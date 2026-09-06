@@ -23,4 +23,4 @@ Schedule::call(function () {
             return $tx->updated_at->addMinutes($requiredDelayMinutes)->isPast();
         })
         ->each(fn ($tx) => FulfillOrderJob::dispatch($tx->id));
-})->everyMinute()->withoutOverlapping(5);
+})->everyMinute()->name('fulfill-order-sweep')->withoutOverlapping(5);
