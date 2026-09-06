@@ -13,6 +13,7 @@ class Transaction extends Model
         'package_code',
         'status',
         'provider_used',
+        'claimed_by',
         'attempt_count',
         'raw_payload',
     ];

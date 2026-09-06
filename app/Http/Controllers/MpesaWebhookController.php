@@ -33,7 +33,7 @@ class MpesaWebhookController extends Controller
                 'mpesa_receipt_number' => $receipt,
                 'phone_number' => $phoneNumber,
                 'amount' => $amount,
-                'status' => 'PENDING',
+                'status' => 'pending',
                 'raw_payload' => $payload,
             ]);
         } catch (QueryException $e) {
@@ -57,7 +57,7 @@ class MpesaWebhookController extends Controller
 
         if ($result->isSuccess) {
             $transaction->update([
-                'status' => 'FULFILLED',
+                'status' => 'fulfilled',
                 'provider_used' => $result->providerName,
                 'attempt_count' => 1,
             ]);
@@ -71,7 +71,7 @@ class MpesaWebhookController extends Controller
 
             if ($fallbackResult->isSuccess) {
                 $transaction->update([
-                    'status' => 'FULFILLED',
+                    'status' => 'fulfilled',
                     'provider_used' => $fallbackResult->providerName,
                     'attempt_count' => 2,
                 ]);
@@ -80,7 +80,7 @@ class MpesaWebhookController extends Controller
         }
 
         $transaction->update([
-            'status' => 'QUEUED_FOR_RETRY',
+            'status' => 'queued_for_retry',
             'attempt_count' => $result->isFastFail ? 2 : 1,
         ]);
 
