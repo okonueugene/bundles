@@ -15,14 +15,15 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->string('package_code', 64)->nullable();
             $table->enum('status', [
-                'PENDING',
-                'FULFILLED',
-                'QUEUED_FOR_RETRY',
-                'PROCESSING',
-                'NEEDS_ATTENTION',
-                'FAILED'
-            ])->default('PENDING');
+                'pending',
+                'fulfilled',
+                'queued_for_retry',
+                'processing',
+                'needs_attention',
+                'over_fulfillment_flagged',
+            ])->default('pending');
             $table->string('provider_used', 32)->nullable();
+            $table->string('claimed_by', 64)->nullable();
             $table->unsignedInteger('attempt_count')->default(0);
             $table->json('raw_payload')->nullable();
             $table->timestamps();
