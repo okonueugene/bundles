@@ -1,0 +1,89 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Services\Providers\ProviderAdapter;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class MpesaWebhookController extends Controller
+{
+    public function handleConfirm(Request $request): JsonResponse
+    {
+        $configuredToken = config('services.mpesa.secret_token');
+
+        if (empty($configuredToken) || $request->query('token') !== $configuredToken) {
+            return response()->json(['ResultCode' => 1, 'ResultDesc' => 'Unauthorized'], 401);
+        }
+
+        $payload = $request->all();
+        $receipt = $payload['TransID'] ?? null;
+        $phoneNumber = $payload['MSISDN'] ?? null;
+        $amount = $payload['TransAmount'] ?? null;
+
+        if (!$receipt || !$phoneNumber || !$amount) {
+            return response()->json(['ResultCode' => 1, 'ResultDesc' => 'Invalid Payload'], 400);
+        }
+
+        try {
+            $transaction = Transaction::create([
+                'mpesa_receipt_number' => $receipt,
+                'phone_number' => $phoneNumber,
+                'amount' => $amount,
+                'status' => 'PENDING',
+                'raw_payload' => $payload,
+            ]);
+        } catch (QueryException $e) {
+            $errorCode = $e->errorInfo[1] ?? null;
+
+            if ($errorCode === 1062) {
+                Log::warning("Duplicate M-PESA callback received for receipt: {$receipt}");
+                return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Already Processed']);
+            }
+
+            Log::error("Database insert error for receipt {$receipt}: " . $e->getMessage());
+            return response()->json(['ResultCode' => 1, 'ResultDesc' => 'Internal Server Error'], 500);
+        }
+
+        /** @var ProviderAdapter $primaryProvider */
+        $primaryProvider = app('provider.primary');
+        /** @var ProviderAdapter $fallbackProvider */
+        $fallbackProvider = app('provider.fallback');
+
+        $result = $primaryProvider->topUp($transaction->phone_number, (float) $transaction->amount);
+
+        if ($result->isSuccess) {
+            $transaction->update([
+                'status' => 'FULFILLED',
+                'provider_used' => $result->providerName,
+                'attempt_count' => 1,
+            ]);
+            return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
+        }
+
+        if ($result->isFastFail) {
+            Log::info("Primary provider fast-failed for receipt {$receipt}. Attempting synchronous fallback...");
+
+            $fallbackResult = $fallbackProvider->topUp($transaction->phone_number, (float) $transaction->amount);
+
+            if ($fallbackResult->isSuccess) {
+                $transaction->update([
+                    'status' => 'FULFILLED',
+                    'provider_used' => $fallbackResult->providerName,
+                    'attempt_count' => 2,
+                ]);
+                return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
+            }
+        }
+
+        $transaction->update([
+            'status' => 'QUEUED_FOR_RETRY',
+            'attempt_count' => $result->isFastFail ? 2 : 1,
+        ]);
+
+        return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
+    }
+}
