@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('provider_used', 32)->nullable();
             $table->string('claimed_by', 64)->nullable();
             $table->unsignedInteger('attempt_count')->default(0);
+            $table->unsignedInteger('background_attempt_count')->default(0);
             $table->json('raw_payload')->nullable();
             $table->timestamps();
 
