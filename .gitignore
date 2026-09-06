@@ -6,6 +6,7 @@
 /public/storage
 /vendor
 /run-reports
+/STATUS.md
 /.envrc
 /.env
 /.env.*
