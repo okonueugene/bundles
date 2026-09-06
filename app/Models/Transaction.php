@@ -15,12 +15,14 @@ class Transaction extends Model
         'provider_used',
         'claimed_by',
         'attempt_count',
+        'background_attempt_count',
         'raw_payload',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'attempt_count' => 'integer',
+        'background_attempt_count' => 'integer',
         'raw_payload' => 'array',
     ];
 }

@@ -58,6 +58,7 @@ class FulfillOrderJob implements ShouldQueue
             }
 
             $transaction->increment('attempt_count');
+            $transaction->increment('background_attempt_count');
             $transaction->refresh();
 
             $result = $primaryProvider->topUp($transaction->phone_number, (float) $transaction->amount);
@@ -95,13 +96,13 @@ class FulfillOrderJob implements ShouldQueue
     {
         $maxBackgroundRetries = config('fulfillment.max_background_retries', 2);
 
-        if ($transaction->attempt_count >= $maxBackgroundRetries) {
+        if ($transaction->background_attempt_count >= $maxBackgroundRetries) {
             $transaction->update([
                 'status' => 'needs_attention',
                 'claimed_by' => null,
             ]);
 
-            Log::critical("TRANSACTION NEEDS ATTENTION: Receipt {$transaction->mpesa_receipt_number} failed after {$transaction->attempt_count} attempts.");
+            Log::critical("TRANSACTION NEEDS ATTENTION: Receipt {$transaction->mpesa_receipt_number} failed after {$transaction->background_attempt_count} background attempts (attempt_count total: {$transaction->attempt_count}).");
             // TODO: AdminAlert::dispatch($transaction) — WhatsApp/Telegram webhook
             // primary, Africa's Talking SMS secondary. Separate task.
         } else {

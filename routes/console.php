@@ -15,10 +15,10 @@ Schedule::call(function () {
     $backoffs = config('fulfillment.backoff_minutes', [1 => 1, 2 => 3]);
 
     Transaction::where('status', 'queued_for_retry')
-        ->where('attempt_count', '<', $maxBackgroundRetries)
+        ->where('background_attempt_count', '<', $maxBackgroundRetries)
         ->get()
         ->filter(function ($tx) use ($backoffs) {
-            $upcomingAttempt = $tx->attempt_count + 1;
+            $upcomingAttempt = $tx->background_attempt_count + 1;
             $requiredDelayMinutes = $backoffs[$upcomingAttempt] ?? 1;
             return $tx->updated_at->addMinutes($requiredDelayMinutes)->isPast();
         })
