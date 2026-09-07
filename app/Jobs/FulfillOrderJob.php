@@ -62,7 +62,11 @@ class FulfillOrderJob implements ShouldQueue
             $transaction->increment('background_attempt_count');
             $transaction->refresh();
 
-            $result = $primaryProvider->topUp($transaction->phone_number, (float) $transaction->amount);
+            $result = $primaryProvider->topUp(
+                $transaction->phone_number,
+                (float) $transaction->amount,
+                $transaction->package_code
+            );
 
             if ($result->isSuccess) {
                 $transaction->update([
@@ -75,7 +79,11 @@ class FulfillOrderJob implements ShouldQueue
             }
 
             Log::info("Primary failed on background retry for receipt {$transaction->mpesa_receipt_number}. Attempting fallback...");
-            $fallbackResult = $fallbackProvider->topUp($transaction->phone_number, (float) $transaction->amount);
+            $fallbackResult = $fallbackProvider->topUp(
+                $transaction->phone_number,
+                (float) $transaction->amount,
+                $transaction->package_code
+            );
 
             if ($fallbackResult->isSuccess) {
                 $transaction->update([

@@ -26,16 +26,17 @@ class AfricasTalkingAdapter implements ProviderAdapter
                 'Accept' => 'application/json',
             ])->timeout(3)
               ->asForm()
-              ->post($baseUrl, [
+              ->post($baseUrl, array_filter([
                   'username' => $username,
                   'recipients' => json_encode([
                       [
                           'phoneNumber' => $phoneNumber,
                           'currencyCode' => 'KES',
                           'amount' => (string) $amount,
-                      ]
-                  ])
-              ]);
+                      ],
+                  ]),
+                  'packageCode' => $packageCode,
+              ], static fn ($value) => $value !== null));
 
             if ($response->failed()) {
                 return TopUpResult::fastFail("HTTP {$response->status()}: " . $response->body());

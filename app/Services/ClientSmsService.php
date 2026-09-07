@@ -16,11 +16,7 @@ class ClientSmsService
             return;
         }
 
-        $message = sprintf(
-            'Confirmed: your top-up of KES %s has been delivered. Ref: %s',
-            $transaction->amount,
-            $transaction->mpesa_receipt_number
-        );
+        $message = $this->buildMessage($transaction);
 
         try {
             $sent = $this->adapter->sendSms($transaction->phone_number, $message);
@@ -33,5 +29,24 @@ class ClientSmsService
         } catch (\Throwable $e) {
             Log::error("ClientSms: exception sending confirmation for receipt {$transaction->mpesa_receipt_number}: {$e->getMessage()}");
         }
+    }
+
+    private function buildMessage(Transaction $transaction): string
+    {
+        if ($transaction->is_substituted) {
+            return sprintf(
+                'Hi, your %s bundle is currently paused. We sent %s instead for your KES %s. Ref: %s',
+                $transaction->original_package_code,
+                $transaction->package_code,
+                $transaction->amount,
+                $transaction->mpesa_receipt_number
+            );
+        }
+
+        return sprintf(
+            'Confirmed: your %s top-up has been delivered. Ref: %s',
+            $transaction->package_code,
+            $transaction->mpesa_receipt_number
+        );
     }
 }
