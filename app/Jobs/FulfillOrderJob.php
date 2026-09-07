@@ -4,23 +4,17 @@ namespace App\Jobs;
 
 use App\Models\Transaction;
 use App\Services\Providers\ProviderAdapter;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class FulfillOrderJob implements ShouldQueue
+class FulfillOrderJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    private int $transactionId;
 
-    public function __construct(public int $transactionId) {}
-
-    public function handle(): void
+    public function handle(int $transactionId): void
     {
+        $this->transactionId = $transactionId;
         $workerId = Str::uuid()->toString();
 
         $claimed = DB::table('transactions')
@@ -44,18 +38,24 @@ class FulfillOrderJob implements ShouldQueue
             /** @var ProviderAdapter $fallbackProvider */
             $fallbackProvider = app('provider.fallback');
 
-            if (method_exists($primaryProvider, 'checkStatus')) {
-                $statusResult = $primaryProvider->checkStatus($transaction->mpesa_receipt_number);
+            $providerToCheck = $transaction->last_attempted_provider
+                ? app($transaction->last_attempted_provider)
+                : $primaryProvider;
 
-                if ($statusResult && $statusResult->isSuccess) {
-                    $transaction->update([
-                        'status' => 'fulfilled',
-                        'provider_used' => $primaryProvider->getName(),
-                        'claimed_by' => null,
-                    ]);
-                    app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
-                    return;
-                }
+            $statusResult = $providerToCheck->checkStatus(
+                $transaction->phone_number,
+                (float) $transaction->amount,
+                $transaction->package_code
+            );
+
+            if ($statusResult->state === 'CONFIRMED_SUCCESS') {
+                $transaction->update([
+                    'status' => 'fulfilled',
+                    'provider_used' => $providerToCheck->getName(),
+                    'claimed_by' => null,
+                ]);
+                app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
+                return;
             }
 
             $transaction->increment('attempt_count');
@@ -95,15 +95,15 @@ class FulfillOrderJob implements ShouldQueue
                 return;
             }
 
-            $this->requeueOrEscalate($transaction);
+            $this->requeueOrEscalate($transaction, 'provider.fallback');
         } catch (\Throwable $e) {
             Log::error("FulfillOrderJob Exception for Tx {$this->transactionId}: " . $e->getMessage());
-            $this->requeueOrEscalate($transaction);
+            $this->requeueOrEscalate($transaction, 'provider.fallback');
             throw $e;
         }
     }
 
-    private function requeueOrEscalate(Transaction $transaction): void
+    private function requeueOrEscalate(Transaction $transaction, string $lastAttemptedProvider): void
     {
         $maxBackgroundRetries = config('fulfillment.max_background_retries', 2);
 
@@ -119,6 +119,7 @@ class FulfillOrderJob implements ShouldQueue
             $transaction->update([
                 'status' => 'queued_for_retry',
                 'claimed_by' => null,
+                'last_attempted_provider' => $lastAttemptedProvider,
             ]);
         }
     }

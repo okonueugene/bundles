@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Transaction extends Model
 {
     protected $fillable = [
+        'order_reference',
+        'checkout_request_id',
         'mpesa_receipt_number',
         'phone_number',
         'amount',
@@ -15,6 +17,7 @@ class Transaction extends Model
         'original_package_code',
         'status',
         'provider_used',
+        'last_attempted_provider',
         'claimed_by',
         'attempt_count',
         'background_attempt_count',

@@ -1,0 +1,123 @@
+{
+  "run_started_at": "2026-09-07T06:24:32.465-05:00",
+  "run_completed_at": "2026-09-07T06:24:32.465-05:00",
+  "summary": "Implemented and verified the STK Push callback pipeline after a behavior-identical fulfillment-service extraction.",
+  "previous_work": {
+    "fix_only_regression": "C2B callback creation, synchronous scheduler execution, and provider status checks were already verified.",
+    "pure_refactor_checkpoint": {
+      "extracted": "The existing MpesaWebhookController fulfillment cascade was moved to FulfillmentService::attemptCascade().",
+      "behavior": "C2B A/B/C regression passed after extraction."
+    }
+  },
+  "files_touched_this_run": [
+    "app/Http/Controllers/MpesaStkCallbackController.php",
+    "app/Http/Controllers/MpesaWebhookController.php",
+    "app/Http/Controllers/OrderController.php",
+    "app/Models/Transaction.php",
+    "app/Services/FulfillmentService.php",
+    "app/Support/CustomerOrderStatus.php",
+    "database/migrations/2026_09_07_062432_add_checkout_request_id_to_transactions_table.php",
+    "routes/api.php"
+  ],
+  "verification": {
+    "c2b_regression_after_extraction": {
+      "a": {
+        "http_status": 401,
+        "body": {
+          "ResultCode": 1,
+          "ResultDesc": "Unauthorized"
+        }
+      },
+      "b": {
+        "http_status": 200,
+        "body": {
+          "ResultCode": 0,
+          "ResultDesc": "Accepted"
+        },
+        "fresh_transaction": {
+          "status": "fulfilled",
+          "provider_used": "FAKE_FALLBACK",
+          "attempt_count": 2
+        },
+        "preexisting_pending_row_unchanged": true
+      },
+      "c": {
+        "http_status": 200,
+        "body": {
+          "ResultCode": 0,
+          "ResultDesc": "Already Processed"
+        }
+      }
+    },
+    "migration": {
+      "name": "2026_09_07_062432_add_checkout_request_id_to_transactions_table",
+      "result": "applied",
+      "current_status_counts": {
+        "pending": 3,
+        "fulfilled": 8,
+        "queued_for_retry": 1,
+        "needs_attention": 1,
+        "payment_failed": 1
+      }
+    },
+    "k_happy_path": {
+      "order_redirect": "/payment/OKOA-RTRP1HVG/waiting",
+      "checkout_request_id_persisted": true,
+      "callback_http_status": 200,
+      "callback_body": {
+        "ResultCode": 0,
+        "ResultDesc": "Accepted"
+      },
+      "transaction": {
+        "status": "fulfilled",
+        "mpesa_receipt_number": "KREC112936",
+        "provider_used": "FAKE_FALLBACK",
+        "attempt_count": 2
+      },
+      "status_api_key": "fulfilled"
+    },
+    "l_resubmission_guard": {
+      "first_redirect": "/payment/OKOA-KCB4LUEN/waiting",
+      "second_redirect": "/",
+      "error": "A payment prompt is already active on your phone. Please complete or cancel it before trying again.",
+      "transaction_count": 1,
+      "stk_call_count": 1
+    },
+    "m_cancelled_prompt": {
+      "callback_http_status": 200,
+      "callback_body": {
+        "ResultCode": 0,
+        "ResultDesc": "Accepted"
+      },
+      "transaction_status": "payment_failed",
+      "status_api_key": "payment_failed",
+      "status_message": "The M-PESA payment was cancelled or timed out. You can try again."
+    },
+    "n_duplicate_callback": {
+      "http_status": 200,
+      "body": {
+        "ResultCode": 0,
+        "ResultDesc": "Accepted"
+      },
+      "status": "fulfilled",
+      "attempt_count": 2,
+      "receipt_unchanged": true
+    },
+    "o_existing_notifications": {
+      "client_sms_service": "sendFulfillmentConfirmation called once",
+      "admin_alert_service": "dispatch called once for unmapped amount"
+    },
+    "laravel_tests": {
+      "passed": 9,
+      "assertions": 28
+    },
+    "route": "POST /api/v1/mpesa/stk-callback registered"
+  },
+  "scope_confirmation": {
+    "telegram_interactive_action_buttons_added": false,
+    "telegram_inbound_webhook_added": false,
+    "new_notification_types_added": false,
+    "catalog_or_checkout_ui_modified": false,
+    "production_deployment_performed": false
+  }
+}

@@ -58,6 +58,11 @@ class AfricasTalkingAdapter implements ProviderAdapter
         }
     }
 
+    public function checkStatus(string $phoneNumber, float $amount, ?string $packageCode = null): StatusCheckResult
+    {
+        return StatusCheckResult::unknown();
+    }
+
     public function sendSms(string $phoneNumber, string $message): bool
     {
         $username = config('services.africastalking.username', 'sandbox');
