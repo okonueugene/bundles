@@ -19,7 +19,6 @@
             New Bundle
         </a>
     </div>
-    @endsection
 
     <div class="bg-white rounded-xl border border-okoa-border overflow-hidden">
         @forelse($mappings as $mapping)
@@ -106,3 +105,4 @@
         </div>
     </div>
 </div>
+@endsection

@@ -127,6 +127,7 @@ class AdminBackOfficeTest extends TestCase
         $this->assertNotNull($mapping);
         $this->assertSame('TEST_ADMIN_PKG', $mapping->package_code);
         $this->assertEquals($amount, (float) $mapping->amount);
+        $this->get(route('admin.bundle-mappings.index'))->assertOk()->assertSee('TEST_ADMIN_PKG');
 
         $this->put(route('admin.bundle-mappings.update', $mapping), [
             'network' => 'safaricom',

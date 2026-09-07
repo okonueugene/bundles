@@ -137,22 +137,8 @@ window.waitingApp = function waitingApp(reference) {
                 }
 
                 const data = await response.json();
-                const redirectStates = [
-                    'paid',
-                    'fulfillment_pending',
-                    'fulfilled',
-                    'fulfillment_failed',
-                    'needs_attention',
-                    'cancelled',
-                ];
 
                 if (data.status && data.status !== 'pending') {
-                    this.stopPolling();
-                    window.location.href = `/orders/${this.reference}`;
-                    return;
-                }
-
-                if (redirectStates.includes(data.status)) {
                     this.stopPolling();
                     window.location.href = `/orders/${this.reference}`;
                 }
