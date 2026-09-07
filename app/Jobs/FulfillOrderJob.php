@@ -103,8 +103,7 @@ class FulfillOrderJob implements ShouldQueue
             ]);
 
             Log::critical("TRANSACTION NEEDS ATTENTION: Receipt {$transaction->mpesa_receipt_number} failed after {$transaction->background_attempt_count} background attempts (attempt_count total: {$transaction->attempt_count}).");
-            // TODO: AdminAlert::dispatch($transaction) — WhatsApp/Telegram webhook
-            // primary, Africa's Talking SMS secondary. Separate task.
+            app(\App\Services\AdminAlertService::class)->dispatch($transaction);
         } else {
             $transaction->update([
                 'status' => 'queued_for_retry',

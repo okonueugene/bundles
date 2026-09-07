@@ -16,6 +16,8 @@ class Transaction extends Model
         'claimed_by',
         'attempt_count',
         'background_attempt_count',
+        'alert_sent_at',
+        'alert_channel',
         'raw_payload',
     ];
 
@@ -23,6 +25,7 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'attempt_count' => 'integer',
         'background_attempt_count' => 'integer',
+        'alert_sent_at' => 'datetime',
         'raw_payload' => 'array',
     ];
 }
