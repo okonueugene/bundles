@@ -1,78 +1,60 @@
-# Okoa
+# Laravel Application
 
-Okoa is a Safaricom data, SMS, and minutes reseller in Kenya. Customers buy
-bundles online and pay via M-PESA; the app ingests the payment, resolves the
-amount to a package code, and delivers the bundle through an airtime/data
-provider.
+A reusable open-source Laravel application foundation with server-rendered
+pages, database-backed workflows, external service adapters, administrative
+tools, and automated tests. It is designed to be adapted, extended, and
+self-hosted.
 
-## Stack
+## Features
 
-- Laravel 11, PHP 8.4, MySQL
-- Tailwind CSS + Alpine.js for the customer-facing UI
-- Vite for asset compilation
+- Laravel routing, controllers, models, migrations, and validation
+- Blade templates with Tailwind CSS and Alpine.js
+- Database-backed workflows with status and retry handling
+- Configurable integrations through service adapters
+- Administrative views for reviewing and managing records
+- Feature and unit tests
 
-## How it works
+## Requirements
 
-Two payment paths converge on the same fulfillment logic:
+- PHP 8.2 or newer
+- Composer
+- Node.js and npm
+- MySQL, SQLite, or another Laravel-supported database
 
-```
-C2B (Till/Paybill):  MpesaWebhookController → Transaction::create() → FulfillmentService
-STK (Web checkout):  OrderController → MpesaService::initiateStkPush() →
-                     MpesaStkCallbackController (matched by CheckoutRequestID) →
-                     FulfillmentService
-```
-
-`FulfillmentService::attemptCascade()` resolves the bundle mapping if needed,
-tries the primary provider synchronously, falls back synchronously on a clean
-fast-fail, marks the transaction `fulfilled` on success, or `queued_for_retry`
-on failure/timeout.
-
-### Background retry sweep
-
-`routes/console.php` registers a scheduled closure (`everyMinute()`,
-`withoutOverlapping(5)`) that queries `queued_for_retry` transactions past
-their backoff window and calls `(new FulfillOrderJob())->handle($tx->id)`
-**directly and synchronously** — there is no queue worker.
-
-`FulfillOrderJob` deliberately does **not** implement `ShouldQueue`. The
-target is cPanel shared hosting with no persistent process to run
-`php artisan queue:work`. Reintroducing `ShouldQueue` or `::dispatch()` on this
-job without verifying a queue consumer exists in the deployment environment
-will silently break background retries.
-
-### Provider status checks
-
-When a provider call times out (as opposed to a clean fast-fail), the outcome
-is genuinely unknown. `last_attempted_provider` records which adapter needs its
-status checked before any retry; `FulfillOrderJob` resolves that adapter via
-`app($transaction->last_attempted_provider)` and calls `checkStatus()` first.
-
-`AfricasTalkingAdapter::checkStatus()` is currently a stub returning `UNKNOWN`
-— their real status-lookup endpoint needs a stored provider request ID this
-codebase doesn't capture yet. Only `FakeProviderAdapter` has a real
-configurable implementation, used for testing.
-
-## Status
-
-The core payment-to-fulfillment pipeline is built and independently verified
-for both payment paths. STK Push's payment-ingestion side has been verified
-against Safaricom's real Daraja sandbox (both success and failure outcomes).
-Fulfillment has been verified against fake provider adapters only — no real
-Africa's Talking credentials are wired in yet.
-
-See `STATUS.md` (local, not committed) for the full audit trail and next steps.
-
-## Local development
+## Installation
 
 ```bash
+git clone <repository-url>
+cd <repository-directory>
+composer install
+npm install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+```
+
+Configure the database and any optional integrations in `.env` before starting
+the application.
+
+## Local development
+
+Start the application:
+
+```bash
 php artisan serve
 ```
 
-The dev database is MySQL (`DB_DATABASE` in `.env`). Tests run against the
-same database — they create and clean up their own rows.
+Compile frontend assets during development:
+
+```bash
+npm run dev
+```
+
+Build production assets:
+
+```bash
+npm run build
+```
 
 ## Testing
 
@@ -80,11 +62,28 @@ same database — they create and clean up their own rows.
 php artisan test
 ```
 
-## Deployment
+## Scheduled tasks
 
-This project targets cPanel shared hosting (account `mcdaveco`). See the
-deployment checklist in `STATUS.md` — it is not yet deployed.
+If scheduled tasks are enabled, configure the host to run the scheduler every
+minute:
+
+```bash
+php artisan schedule:run
+```
+
+Review the application configuration before enabling queues, scheduled tasks,
+or external integrations in a production environment.
+
+## Contributing
+
+1. Create a topic branch.
+2. Make focused changes and add tests where appropriate.
+3. Run the relevant tests and asset build.
+4. Open a pull request describing the change and its verification.
+
+Do not commit credentials, generated archives, local reports, runtime logs, or
+environment-specific configuration.
 
 ## License
 
-MIT
+This project is released under the MIT License. See `LICENSE` if included.
