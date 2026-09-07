@@ -57,25 +57,4 @@ class AfricasTalkingAdapter implements ProviderAdapter
         }
     }
 
-    public function sendSms(string $recipient, string $message): bool
-    {
-        $username = config('services.africastalking.username', 'sandbox');
-        $apiKey = config('services.africastalking.api_key');
-        $baseUrl = $username === 'sandbox'
-            ? 'https://api.sandbox.africastalking.com/version1/messaging'
-            : 'https://api.africastalking.com/version1/messaging';
-
-        $response = Http::withHeaders([
-            'apiKey' => $apiKey,
-            'Accept' => 'application/json',
-        ])->timeout(5)
-          ->asForm()
-          ->post($baseUrl, [
-              'username' => $username,
-              'to' => $recipient,
-              'message' => $message,
-          ]);
-
-        return $response->successful();
-    }
 }

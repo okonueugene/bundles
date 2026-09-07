@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Notifications\Channels\AfricasTalkingSmsAlertChannel;
 use App\Notifications\Channels\TelegramAlertChannel;
 use App\Services\AdminAlertService;
 use Illuminate\Support\ServiceProvider;
@@ -31,7 +30,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AdminAlertService::class, function ($app) {
             return new AdminAlertService([
                 $app->make(TelegramAlertChannel::class),
-                $app->make(AfricasTalkingSmsAlertChannel::class),
             ]);
         });
     }
