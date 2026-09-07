@@ -33,6 +33,10 @@ class MpesaService
         ];
 
         try {
+            Log::info('STK Push outgoing payload [TEMPORARY DIAGNOSTIC]', [
+                'payload' => $payload,
+            ]);
+
             $response = Http::withToken($token)
                 ->accept('application/json')
                 ->post($this->endpoint('/mpesa/stkpush/v1/processrequest'), $payload);

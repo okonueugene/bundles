@@ -430,6 +430,33 @@ documented above and in `run-reports/2026-09-07T060135-0500.json`.
 - No payload-shape mismatch was silently patched. No fulfillment-side files
   were modified. Laravel tests: 10 passed, 34 assertions.
 
+### STK callback alias follow-up: 2026-09-07 14:40-14:44 local
+
+- The prior Quick Tunnel returned HTTP 530, so a replacement tunnel was
+  started at `https://condo-sale-defined-entries.trycloudflare.com` and the
+  ignored local callback settings were updated only in `.env`.
+- Added `/api/v1/c2b/stk-callback` while retaining the old
+  `/api/v1/mpesa/stk-callback` route.
+- Added temporary diagnostic logging named
+  `STK Push outgoing payload [TEMPORARY DIAGNOSTIC]`. The logged request
+  confirmed the transmitted `CallBackURL` was
+  `https://condo-sale-defined-entries.trycloudflare.com/api/v1/c2b/stk-callback`.
+  The logged `Password` field is sensitive and is not reproduced in this
+  status file or the run report.
+- C2B registration attempts 1-3 all returned
+  `500.003.1001`, `Service is currently unreachable`, with request IDs
+  recorded in the timestamped run report. Test T remained blocked, so no
+  C2B ValidationURL or ConfirmationURL payload exists.
+- Test U used the real public checkout flow for `1gb-data` at KSh 99 and
+  `254708374149`. STK initiation returned checkout request ID
+  `ws_CO_070920262242598708374149`.
+- Safaricom delivered this exact raw callback body:
+  `{"Body":{"stkCallback":{"MerchantRequestID":"acb1-49f3-a5a1-a6a35275487830618","CheckoutRequestID":"ws_CO_070920262242598708374149","ResultCode":1037,"ResultDesc":"DS timeout user cannot be reached."}}}`
+- The transaction `OKOA-FNQZRLNX` ended as `payment_failed`, with no receipt.
+  The callback shape matched the existing controller's expected
+  `Body.stkCallback.CheckoutRequestID` and `ResultCode` fields; no parsing
+  change was made. No fulfillment-side files were touched.
+
 ## Intentionally Not Implemented
 
 - WhatsApp and SMS admin alerts
