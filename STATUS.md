@@ -490,6 +490,33 @@ documented above and in `run-reports/2026-09-07T060135-0500.json`.
 - No fulfillment files or provider bindings were touched. Laravel tests:
   10 passed, 34 assertions.
 
+### Back office and public lookup throttling: 2026-09-07 16:31 local
+
+- Added the unauthenticated, auth-ready `/admin` route group with a
+  deployment TODO for `auth` and `can:admin` middleware.
+- Added transaction order listing with status/search filters, transaction
+  detail pages, manual resolution fields and workflow, and read-only alert
+  history.
+- Added full bundle-mapping CRUD. The actual schema has 11 fields used by the
+  model and migrations: `network`, `slug`, `amount`, `type`, `package_code`,
+  `fallback_package_code`, `available_from`, `available_until`, `description`,
+  `validity`, plus timestamps. There is no stored `is_available` column;
+  availability remains computed from the time window.
+- Added `manually_resolved_at` and `resolution_note` to transactions and
+  applied migration `2026_09_07_211724_add_manual_resolution_to_transactions_table`.
+- Added `throttle:10,1` to POST `/track-order` and `throttle:30,1` to GET
+  `/orders/{orderReference}`.
+- Verification resolved transaction `OKOA-RES20260907213216443` to
+  `fulfilled`; `manually_resolved_at` was populated and the resolution note
+  was persisted. Bundle CRUD create/edit/delete passed, and the live mapping
+  count remained 11 after cleanup.
+- Throttle tests confirmed request 11 returns HTTP 429 for lookup and request
+  31 returns HTTP 429 for order status.
+- Focused back-office suite: 6 passed, 76 assertions. Full suite: 16 passed,
+  110 assertions.
+- No fulfillment, provider, M-PESA callback, or Daraja sandbox files were
+  touched. Authentication remains intentionally unimplemented.
+
 ## Intentionally Not Implemented
 
 - WhatsApp and SMS admin alerts

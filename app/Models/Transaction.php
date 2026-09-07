@@ -23,6 +23,8 @@ class Transaction extends Model
         'background_attempt_count',
         'alert_sent_at',
         'alert_channel',
+        'manually_resolved_at',
+        'resolution_note',
         'client_sms_sent_at',
         'raw_payload',
     ];
@@ -33,6 +35,7 @@ class Transaction extends Model
         'background_attempt_count' => 'integer',
         'is_substituted' => 'boolean',
         'alert_sent_at' => 'datetime',
+        'manually_resolved_at' => 'datetime',
         'client_sms_sent_at' => 'datetime',
         'raw_payload' => 'array',
     ];

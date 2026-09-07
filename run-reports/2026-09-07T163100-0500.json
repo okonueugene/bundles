@@ -1,0 +1,61 @@
+{
+  "run": "back-office",
+  "timestamp": "2026-09-07T16:31:00-05:00",
+  "routes": {
+    "admin_group": "unauthenticated by explicit approval; auth-ready TODO retained",
+    "public_lookup_throttle": "throttle:10,1",
+    "public_order_show_throttle": "throttle:30,1"
+  },
+  "migration": {
+    "file": "database/migrations/2026_09_07_211724_add_manual_resolution_to_transactions_table.php",
+    "status": "applied",
+    "fields": [
+      "manually_resolved_at",
+      "resolution_note"
+    ]
+  },
+  "bundle_mapping_schema": {
+    "columns_used": [
+      "network",
+      "slug",
+      "amount",
+      "type",
+      "package_code",
+      "fallback_package_code",
+      "available_from",
+      "available_until",
+      "description",
+      "validity",
+      "created_at",
+      "updated_at"
+    ],
+    "is_available_column": false,
+    "live_mapping_count": 11
+  },
+  "manual_resolution": {
+    "order_reference": "OKOA-RES20260907213216443",
+    "final_status": "fulfilled",
+    "manually_resolved_at": "2026-09-07T21:32:16Z",
+    "resolution_note": "Confirmed delivered via Safaricom SMS after provider timeout."
+  },
+  "crud": {
+    "bundle_mapping_create": "passed",
+    "bundle_mapping_edit": "passed",
+    "bundle_mapping_delete": "passed"
+  },
+  "throttling": {
+    "track_order_request_11": 429,
+    "order_show_request_31": 429
+  },
+  "tests": {
+    "focused": "6 passed, 76 assertions",
+    "full": "16 passed, 110 assertions"
+  },
+  "scope": {
+    "authentication_added": false,
+    "fulfillment_files_touched": false,
+    "provider_bindings_touched": false,
+    "mpesa_callback_files_touched": false,
+    "daraja_sandbox_files_touched": false
+  }
+}
