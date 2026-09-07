@@ -1,6 +1,6 @@
 /.phpunit.cache
 /.phpunit.result.cache
-/okoa.zip
+/*.zip
 /node_modules
 /public/build
 /public/hot
