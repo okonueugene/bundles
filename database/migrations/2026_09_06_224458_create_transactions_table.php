@@ -28,6 +28,7 @@ return new class extends Migration
             $table->unsignedInteger('background_attempt_count')->default(0);
             $table->timestamp('alert_sent_at')->nullable();
             $table->string('alert_channel', 16)->nullable();
+            $table->timestamp('client_sms_sent_at')->nullable();
             $table->json('raw_payload')->nullable();
             $table->timestamps();
 
