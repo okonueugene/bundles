@@ -26,6 +26,8 @@ return new class extends Migration
             $table->string('claimed_by', 64)->nullable();
             $table->unsignedInteger('attempt_count')->default(0);
             $table->unsignedInteger('background_attempt_count')->default(0);
+            $table->timestamp('alert_sent_at')->nullable();
+            $table->string('alert_channel', 16)->nullable();
             $table->json('raw_payload')->nullable();
             $table->timestamps();
 
