@@ -401,6 +401,35 @@ Additional checks:
 The fix-only verification for the queue and provider-status corrections is
 documented above and in `run-reports/2026-09-07T060135-0500.json`.
 
+### Real Daraja sandbox integration: 2026-09-07 14:20-14:26 local
+
+- Configured the ignored local `.env` with the Daraja sandbox credentials
+  discovered in `/home/terminus/Downloads/pesapos/.env`, the source app's
+  shortcode/passkey, C2B shortcode `600984`, and the active Cloudflare Quick
+  Tunnel callback base URL. No credential values were committed or printed.
+- Added sandbox-aware Daraja endpoint selection to `MpesaService`, exposed its
+  token fetch for the registration command, and corrected the coupled
+  `successful()` response-method typo.
+- Added `mpesa:register-urls` and raw request-body logging for C2B and STK
+  callbacks. Added `/api/v1/c2b/confirm` and `/api/v1/c2b/validate` aliases
+  because Safaricom rejected callback URLs containing the word `MPESA`.
+  The original routes and controller parsing were unchanged.
+- Laravel OAuth succeeded through `MpesaService`; the access token was not
+  printed.
+- Initial C2B registration returned `400.003.02`,
+  `Bad Request - Invalid ValidationURL - URL has the word MPESA`.
+- Registration using the aliases was retried twice and returned
+  `500.003.1001`, `Service is currently unreachable`. Test T was therefore
+  not run and no real C2B callback payload was received.
+- Test U submitted through the public checkout flow using `1gb-data`,
+  `KSh 99`, and `254708374149`. STK initiation succeeded with checkout
+  request ID `ws_CO_070920262223044708374149`.
+- After a two-minute callback wait, no STK callback arrived. The transaction
+  remained `pending`, with no receipt and no raw callback payload, so no exact
+  Safaricom STK callback body or fulfillment result is available.
+- No payload-shape mismatch was silently patched. No fulfillment-side files
+  were modified. Laravel tests: 10 passed, 34 assertions.
+
 ## Intentionally Not Implemented
 
 - WhatsApp and SMS admin alerts
@@ -408,7 +437,6 @@ documented above and in `run-reports/2026-09-07T060135-0500.json`.
   unimplemented pending the support-workflow decision.
 - Bundle mapping rows are populated by `BundleMappingSeeder`; the verified
   local database currently contains 11 Safaricom mappings.
-- M-PESA `ValidationURL`
 - Reconciliation against M-PESA statements
 - Providers other than Africa's Talking and the fake adapters
 - Production deployment

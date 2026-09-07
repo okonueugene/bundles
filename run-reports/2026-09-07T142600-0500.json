@@ -1,0 +1,88 @@
+{
+  "run": "real-daraja-sandbox-integration",
+  "timestamp": "2026-09-07T14:26:00-05:00",
+  "environment": {
+    "credentials_source": "/home/terminus/Downloads/pesapos/.env",
+    "credentials_values_exposed": false,
+    "okoa_env_ignored": true,
+    "tunnel_base_url": "https://singh-journalists-productions-andrea.trycloudflare.com",
+    "provider_primary": "FAKE_PRIMARY",
+    "provider_fallback": "FAKE_FALLBACK"
+  },
+  "changes": [
+    "Added sandbox-aware Daraja endpoint selection to MpesaService.",
+    "Exposed MpesaService access-token retrieval for the registration command.",
+    "Added mpesa:register-urls.",
+    "Added raw request-body logging to the existing C2B and STK controllers without changing parsing.",
+    "Added non-MPESA C2B callback aliases required by Safaricom URL validation."
+  ],
+  "oauth": {
+    "laravel_service": {
+      "status": "passed",
+      "token_length": 28,
+      "token_value_recorded": false
+    },
+    "direct_curl": {
+      "status": "failed",
+      "http_status": 400,
+      "body": "",
+      "note": "The source .env could not be shell-sourced because it contains syntax-invalid unquoted values; Laravel's parsed configuration succeeded."
+    }
+  },
+  "c2b_registration": [
+    {
+      "attempt": 1,
+      "http_status": 400,
+      "raw_body": "<html>Incapsula block page; incident_id=899000460497920604</html>",
+      "note": "The initial invocation returned the full Incapsula HTML block page."
+    },
+    {
+      "attempt": 2,
+      "http_status": 400,
+      "raw_body": "{\"requestId\":\"acb1-49f3-a5a1-a6a35275487829591\",\"errorCode\":\"400.003.02\",\"errorMessage\":\"Bad Request - Invalid ValidationURL - URL has the word MPESA\"}"
+    },
+    {
+      "attempt": 3,
+      "http_status": 500,
+      "raw_body": "{\"requestId\":\"acb1-49f3-a5a1-a6a35275487829628\",\"errorCode\":\"500.003.1001\",\"errorMessage\":\"Service is currently unreachable. Please try again later.\"}"
+    },
+    {
+      "attempt": 4,
+      "http_status": 500,
+      "raw_body": "{\"requestId\":\"8f38-49f8-9be4-b87d691148b4590230\",\"errorCode\":\"500.003.1001\",\"errorMessage\":\"Service is currently unreachable. Please try again later.\"}"
+    }
+  ],
+  "test_t": {
+    "status": "blocked",
+    "validation_called": null,
+    "confirmation_called": null,
+    "raw_confirmation_body": null,
+    "transaction_created": false,
+    "reason": "C2B URL registration did not complete."
+  },
+  "test_u": {
+    "status": "partial",
+    "checkout_flow": "real public OrderController::store flow",
+    "product": "1gb-data",
+    "amount": 99,
+    "phone": "254708374149",
+    "order_reference": "OKOA-T8P0DI2J",
+    "stk_initiation": "accepted",
+    "checkout_request_id": "ws_CO_070920262223044708374149",
+    "raw_stk_callback_body": null,
+    "callback_wait_seconds": 120,
+    "transaction": {
+      "status": "pending",
+      "mpesa_receipt_number": null,
+      "raw_payload": null
+    },
+    "reason": "No callback arrived during the observation window."
+  },
+  "verification": {
+    "laravel_tests": "10 passed, 34 assertions",
+    "fulfillment_files_touched": false,
+    "env_committed": false,
+    "payload_mismatch_silently_patched": false,
+    "transaction_count_after_run": 54
+  }
+}

@@ -12,6 +12,9 @@ class MpesaStkCallbackController extends Controller
 {
     public function handle(Request $request, FulfillmentService $fulfillmentService): JsonResponse
     {
+        Log::info('Raw STK callback payload received', [
+            'body' => $request->getContent(),
+        ]);
         $callback = $request->input('Body.stkCallback');
 
         $checkoutRequestId = is_array($callback) ? ($callback['CheckoutRequestID'] ?? null) : null;

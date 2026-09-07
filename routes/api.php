@@ -14,4 +14,6 @@ Route::get('/user', function (Request $request) {
 Route::post('/v1/mpesa/confirm', [MpesaWebhookController::class, 'handleConfirm']);
 Route::post('/v1/mpesa/stk-callback', [MpesaStkCallbackController::class, 'handle']);
 Route::post('/v1/mpesa/validate', [MpesaValidationController::class, 'validate']);
+Route::post('/v1/c2b/confirm', [MpesaWebhookController::class, 'handleConfirm']);
+Route::post('/v1/c2b/validate', [MpesaValidationController::class, 'validate']);
 Route::get('/v1/orders/{reference}/status', [OrderStatusController::class, 'show'])->name('api.orders.status');

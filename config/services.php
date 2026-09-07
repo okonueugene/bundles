@@ -39,9 +39,12 @@ return [
         'secret_token' => env('MPESA_SECRET_TOKEN'),
         'consumer_key' => env('MPESA_CONSUMER_KEY'),
         'consumer_secret' => env('MPESA_CONSUMER_SECRET'),
-        'shortcode' => env('MPESA_SHORTCODE'),
-        'passkey' => env('MPESA_PASSKEY'),
+        'environment' => env('MPESA_ENV', 'sandbox'),
+        'shortcode' => env('MPESA_STK_SHORTCODE', env('MPESA_SHORTCODE')),
+        'passkey' => env('MPESA_STK_PASSKEY', env('MPESA_PASSKEY')),
         'callback_url' => env('MPESA_CALLBACK_URL'),
+        'callback_base_url' => env('MPESA_CALLBACK_BASE_URL'),
+        'c2b_shortcode' => env('MPESA_C2B_SHORTCODE', '600984'),
     ],
 
     'africastalking' => [

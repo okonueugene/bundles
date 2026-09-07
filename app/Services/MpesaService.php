@@ -35,11 +35,11 @@ class MpesaService
         try {
             $response = Http::withToken($token)
                 ->accept('application/json')
-                ->post('https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest', $payload);
+                ->post($this->endpoint('/mpesa/stkpush/v1/processrequest'), $payload);
 
             $data = $response->json();
 
-            if ($response->success() && isset($data['ResponseCode']) && $data['ResponseCode'] === '0') {
+            if ($response->successful() && isset($data['ResponseCode']) && $data['ResponseCode'] === '0') {
                 return [
                     'success' => true,
                     'checkout_request_id' => $data['CheckoutRequestID'] ?? null,
@@ -66,21 +66,30 @@ class MpesaService
         }
     }
 
-    private function getAccessToken(): string
+    public function getAccessToken(): string
     {
         return Cache::remember("mpesa:access_token", 3300, function () {
             $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
                 ->accept('application/json')
-                ->get('https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials');
+                ->get($this->endpoint('/oauth/v1/generate?grant_type=client_credentials'));
 
             $data = $response->json();
 
-            if (! $response->success() || empty($data['access_token'])) {
+            if (! $response->successful() || empty($data['access_token'])) {
                 throw new \RuntimeException('Failed to get M-PESA access token');
             }
 
             return $data['access_token'];
         });
+    }
+
+    private function endpoint(string $path): string
+    {
+        $host = config('services.mpesa.environment', 'sandbox') === 'live'
+            ? 'https://api.safaricom.co.ke'
+            : 'https://sandbox.safaricom.co.ke';
+
+        return $host.$path;
     }
 
     private function normalizePhone(string $phoneNumber): string

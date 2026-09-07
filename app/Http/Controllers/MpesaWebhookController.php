@@ -20,6 +20,9 @@ class MpesaWebhookController extends Controller
         }
 
         $payload = $request->all();
+        Log::info('Raw C2B confirmation payload received', [
+            'body' => $request->getContent(),
+        ]);
         $receipt = $payload['TransID'] ?? null;
         $phoneNumber = $payload['MSISDN'] ?? null;
         $amount = $payload['TransAmount'] ?? null;
