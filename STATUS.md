@@ -457,6 +457,39 @@ documented above and in `run-reports/2026-09-07T060135-0500.json`.
   `Body.stkCallback.CheckoutRequestID` and `ResultCode` fields; no parsing
   change was made. No fulfillment-side files were touched.
 
+### Dedicated sandbox app and STK success: 2026-09-07 14:59-15:04 local
+
+- The local ignored `.env` contained a new dedicated app's credentials.
+  OAuth succeeded with a 28-character token. The configured C2B shortcode
+  remained `600984` and the STK shortcode remained `174379`; no credential
+  values were printed or committed.
+- The replacement tunnel was
+  `https://owners-safer-tone-bend.trycloudflare.com`, and it responded with
+  HTTP 200. The local callback URL used the retained non-`mpesa` STK alias.
+- C2B registration returned `500.003.1001` on all three attempts:
+  request IDs `acb1-49f3-a5a1-a6a35275487831877`,
+  `8f38-49f8-9be4-b87d691148b4590905`, and
+  `acb1-49f3-a5a1-a6a35275487831944`.
+  Switching consumer credentials did not resolve the registration error;
+  because the shortcode remained the shared `600984`, this is not evidence
+  about a fresh shortcode conflict.
+- Safaricom's public SDK documentation identifies `254708374149` as the
+  standard sandbox STK test MSISDN and did not document a separate success
+  MSISDN or success simulation parameter. The authorized personal Safaricom
+  number was therefore tested once.
+- Important correction: the requested KSh 1 amount was not available as a
+  seeded product. The submitted product was `50-sms`, so the actual STK
+  amount was KSh 50. No second prompt was sent.
+- Safaricom delivered this exact success callback:
+  `{"Body":{"stkCallback":{"MerchantRequestID":"8f38-49f8-9be4-b87d691148b4590953","CheckoutRequestID":"ws_CO_070920262303176725614560","ResultCode":0,"ResultDesc":"The service request is processed successfully.","CallbackMetadata":{"Item":[{"Name":"Amount","Value":50.00},{"Name":"MpesaReceiptNumber","Value":"UI7CB5LKWI"},{"Name":"Balance","Value":0.00},{"Name":"TransactionDate","Value":20260907230331},{"Name":"PhoneNumber","Value":254725614560}]}}}}`
+- The transaction `OKOA-CGCMOJM4` reached `fulfilled`; the controller
+  extracted receipt `UI7CB5LKWI` and invoked the existing fulfillment
+  cascade. Delivery used `FAKE_FALLBACK`, with `attempt_count = 2`; no real
+  Africa's Talking call was made. The callback metadata matched the
+  existing parser, so no parsing changes were made.
+- No fulfillment files or provider bindings were touched. Laravel tests:
+  10 passed, 34 assertions.
+
 ## Intentionally Not Implemented
 
 - WhatsApp and SMS admin alerts
