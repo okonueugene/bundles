@@ -1,6 +1,6 @@
 # Project Status
 
-Last verified: 2026-09-07 06:24 local
+Last verified: 2026-09-07 06:41 local
 
 ## Change Documentation Policy
 
@@ -10,6 +10,22 @@ Last verified: 2026-09-07 06:24 local
   and run report together when the work is ready to record.
 - This policy was adopted on 2026-09-07 06:33 local and applies to all
   subsequent edits.
+
+### Commit archive verification: 2026-09-07 06:41 local
+
+- Independently inspected commit `164fd84` and its committed file list.
+- Created an exact Git archive at `/home/terminus/Downloads/okoa-164fd84.zip`.
+- Archive SHA-256:
+  `3840896a5c5cbbbeed425b48693b6de232ce0c7f0755698449ba910603130f9c`.
+- The archive contains `FulfillmentService.php`,
+  `MpesaStkCallbackController.php`, `MpesaWebhookController.php`,
+  `FulfillOrderJob.php`, `OrderController.php`, `STATUS.md`, and the
+  `2026-09-07T062432-0500.json` run report.
+- The service extraction preserves the pre-existing fulfillment cascade; the
+  committed version also includes the previously implemented
+  `last_attempted_provider` tracking fix, so it is behavior-preserving
+  relative to the current corrected C2B flow rather than a byte-for-byte copy
+  of the older pre-fix controller.
 
 ## Runtime
 

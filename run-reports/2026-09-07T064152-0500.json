@@ -1,0 +1,37 @@
+{
+  "run_started_at": "2026-09-07T06:41:52.043-05:00",
+  "run_completed_at": "2026-09-07T06:41:52.043-05:00",
+  "summary": "Independently inspected commit 164fd84 and exported an exact repository archive for external review.",
+  "commit": {
+    "sha": "164fd84490200b8c08bf4fa20e97bbf41540efbc",
+    "message": "Complete Okoa customer payment pipeline"
+  },
+  "archive": {
+    "path": "/home/terminus/Downloads/okoa-164fd84.zip",
+    "format": "zip",
+    "sha256": "3840896a5c5cbbbeed425b48693b6de232ce0c7f0755698449ba910603130f9c",
+    "created_from": "git archive 164fd84"
+  },
+  "independent_review": {
+    "fulfillment_service": {
+      "file": "app/Services/FulfillmentService.php",
+      "result": "Contains the extracted resolution and provider cascade, including existing attempt-count, status, fallback, SMS, admin-alert, and last-attempted-provider behavior."
+    },
+    "stk_callback": {
+      "file": "app/Http/Controllers/MpesaStkCallbackController.php",
+      "idempotency_order": "The status !== pending check occurs after checkout-request lookup and before failure handling, receipt persistence, or FulfillmentService::attemptCascade()."
+    },
+    "background_job": {
+      "file": "app/Jobs/FulfillOrderJob.php",
+      "result": "No ShouldQueue implementation and no FulfillOrderJob dispatch call; only the existing AdminAlertService dispatch remains."
+    },
+    "resubmission_guard": {
+      "file": "app/Http/Controllers/OrderController.php",
+      "result": "The checkout_request_id guard occurs after pending transaction reuse/creation and before MpesaService::initiateStkPush()."
+    },
+    "commit_file_list": {
+      "result": "The commit includes the claimed fulfillment, STK, order, job, migration, route, status, and run-report files; no unexpected archive was included."
+    }
+  },
+  "scope_note": "The extraction is behavior-preserving relative to the current corrected C2B flow. It is not byte-for-byte identical to the older pre-fix controller because last_attempted_provider tracking was already part of the fix-only pass."
+}
