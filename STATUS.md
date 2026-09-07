@@ -1,6 +1,6 @@
 # Project Status
 
-Last verified: 2026-09-07 06:48 local
+Last verified: 2026-09-07 13:45 local
 
 ## Change Documentation Policy
 
@@ -42,6 +42,24 @@ Last verified: 2026-09-07 06:48 local
 - Full Laravel suite: 10 passed, 34 assertions.
 - `FulfillOrderJob` contains no `throw $e`, `ShouldQueue`, or
   `FulfillOrderJob::dispatch()` references.
+
+### C2B ValidationURL: 2026-09-07 13:45 local
+
+- Added `POST /api/v1/mpesa/validate` using
+  `MpesaValidationController`.
+- Valid mapped amounts return `ResultCode = "0"` and do not create a
+  transaction.
+- Missing or unmapped amounts return `C2B00013`.
+- Missing or invalid validation tokens return `C2B00016`.
+- Existing `BundleMapping::resolveForAmount()` is reused; no schema or
+  transaction logic was added.
+- Tests P–R returned HTTP `200` with the expected response bodies.
+- No seeded mapping currently has a time window and no fallback, so Test S
+  was not applicable and no mapping was fabricated.
+- Transaction count remained unchanged at 44 before and after P–S.
+- Full Laravel suite: 10 passed, 34 assertions.
+- Only `MpesaValidationController.php` and `routes/api.php` were modified
+  for the implementation.
 
 ## Runtime
 
