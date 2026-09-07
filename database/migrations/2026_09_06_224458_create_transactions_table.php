@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('phone_number', 15);
             $table->decimal('amount', 10, 2);
             $table->string('package_code', 64)->nullable();
+            $table->boolean('is_substituted')->default(false);
+            $table->string('original_package_code', 64)->nullable();
             $table->enum('status', [
                 'pending',
                 'fulfilled',
