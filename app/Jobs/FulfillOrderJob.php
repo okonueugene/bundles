@@ -53,6 +53,7 @@ class FulfillOrderJob implements ShouldQueue
                         'provider_used' => $primaryProvider->getName(),
                         'claimed_by' => null,
                     ]);
+                    app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
                     return;
                 }
             }
@@ -69,6 +70,7 @@ class FulfillOrderJob implements ShouldQueue
                     'provider_used' => $result->providerName,
                     'claimed_by' => null,
                 ]);
+                app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
                 return;
             }
 
@@ -81,6 +83,7 @@ class FulfillOrderJob implements ShouldQueue
                     'provider_used' => $fallbackResult->providerName,
                     'claimed_by' => null,
                 ]);
+                app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
                 return;
             }
 

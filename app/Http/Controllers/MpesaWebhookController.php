@@ -61,6 +61,7 @@ class MpesaWebhookController extends Controller
                 'provider_used' => $result->providerName,
                 'attempt_count' => 1,
             ]);
+            app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
             return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
         }
 
@@ -75,6 +76,7 @@ class MpesaWebhookController extends Controller
                     'provider_used' => $fallbackResult->providerName,
                     'attempt_count' => 2,
                 ]);
+                app(\App\Services\ClientSmsService::class)->sendFulfillmentConfirmation($transaction);
                 return response()->json(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
             }
         }

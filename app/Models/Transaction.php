@@ -18,6 +18,7 @@ class Transaction extends Model
         'background_attempt_count',
         'alert_sent_at',
         'alert_channel',
+        'client_sms_sent_at',
         'raw_payload',
     ];
 
@@ -26,6 +27,7 @@ class Transaction extends Model
         'attempt_count' => 'integer',
         'background_attempt_count' => 'integer',
         'alert_sent_at' => 'datetime',
+        'client_sms_sent_at' => 'datetime',
         'raw_payload' => 'array',
     ];
 }
