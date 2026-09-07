@@ -1,6 +1,6 @@
 # Project Status
 
-Last verified: 2026-09-07 06:41 local
+Last verified: 2026-09-07 06:48 local
 
 ## Change Documentation Policy
 
@@ -26,6 +26,22 @@ Last verified: 2026-09-07 06:41 local
   `last_attempted_provider` tracking fix, so it is behavior-preserving
   relative to the current corrected C2B flow rather than a byte-for-byte copy
   of the older pre-fix controller.
+
+### Scheduler exception isolation: 2026-09-07 06:48 local
+
+- Removed the obsolete `throw $e` from `FulfillOrderJob::handle()`. The job is
+  invoked synchronously by the scheduler, so rethrowing an already handled
+  provider exception would abort the remaining transactions in the same
+  collection batch.
+- Added `FulfillmentSchedulerTest`, which queues three transactions, makes
+  the first primary provider call throw, and invokes the same direct job
+  callback used by the scheduler.
+- The first transaction was requeued after its exception; the second and
+  third transactions were fulfilled in the same batch.
+- Targeted test: 1 passed, 6 assertions.
+- Full Laravel suite: 10 passed, 34 assertions.
+- `FulfillOrderJob` contains no `throw $e`, `ShouldQueue`, or
+  `FulfillOrderJob::dispatch()` references.
 
 ## Runtime
 

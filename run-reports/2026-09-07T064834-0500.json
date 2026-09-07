@@ -1,0 +1,47 @@
+{
+  "run_started_at": "2026-09-07T06:48:34.655-05:00",
+  "run_completed_at": "2026-09-07T06:48:34.655-05:00",
+  "summary": "Removed synchronous scheduler exception rethrow and added batch-continuation regression coverage.",
+  "files_changed": [
+    "app/Jobs/FulfillOrderJob.php",
+    "tests/Feature/FulfillmentSchedulerTest.php",
+    "STATUS.md",
+    "run-reports/2026-09-07T064834-0500.json"
+  ],
+  "change": {
+    "removed": "throw $e from FulfillOrderJob::handle() catch block",
+    "reason": "The scheduler invokes jobs synchronously; rethrowing after requeueOrEscalate would abort the remaining transactions in the same batch.",
+    "preserved": "Exception logging and requeueOrEscalate handling remain in place."
+  },
+  "regression": {
+    "scenario": "Three queued transactions; the first provider call throws and the next two provider calls succeed.",
+    "first_transaction": {
+      "status": "queued_for_retry",
+      "result": "Exception handled and transaction requeued."
+    },
+    "second_transaction": {
+      "status": "fulfilled",
+      "background_attempt_count": 1
+    },
+    "third_transaction": {
+      "status": "fulfilled",
+      "background_attempt_count": 1
+    },
+    "batch_continued": true,
+    "targeted_tests": {
+      "passed": 1,
+      "assertions": 6
+    },
+    "full_suite": {
+      "passed": 10,
+      "assertions": 34
+    }
+  },
+  "checks": {
+    "php_syntax": "passed",
+    "git_diff_check": "passed",
+    "fulfill_order_job_contains_throw_e": false,
+    "fulfill_order_job_contains_should_queue": false,
+    "fulfill_order_job_contains_dispatch": false
+  }
+}

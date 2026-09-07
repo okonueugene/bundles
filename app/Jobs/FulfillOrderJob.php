@@ -99,7 +99,6 @@ class FulfillOrderJob
         } catch (\Throwable $e) {
             Log::error("FulfillOrderJob Exception for Tx {$this->transactionId}: " . $e->getMessage());
             $this->requeueOrEscalate($transaction, 'provider.fallback');
-            throw $e;
         }
     }
 
