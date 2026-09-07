@@ -11,7 +11,28 @@
     ])
 
     <div class="bg-white rounded-xl border border-okoa-border overflow-hidden">
-        <div class="overflow-x-auto">
+        @forelse($transactions as $tx)
+            {{-- Mobile card, shown only below sm --}}
+            <div class="sm:hidden border-b border-okoa-border p-4 last:border-b-0">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="font-medium text-okoa-charcoal">{{ $tx->order_reference ?: 'C2B #'.$tx->id }}</div>
+                        <div class="text-xs text-okoa-muted">{{ $tx->alert_channel ?: '—' }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-okoa-muted">{{ $tx->alert_sent_at?->format('M j, Y H:i') }}</div>
+                        <div class="text-xs text-okoa-muted">{{ str_replace('_', ' ', $tx->status) }}</div>
+                    </div>
+                </div>
+                <a href="{{ route('admin.orders.show', $tx) }}" class="mt-3 inline-flex min-h-9 items-center text-xs font-semibold text-ok hover:text-ok-dark">
+                    View →
+                </a>
+            </div>
+        @empty
+            <div class="p-8 text-center text-okoa-muted sm:col-span-2">No alerts recorded.</div>
+        @endforelse
+
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-okoa-bg border-b border-okoa-border text-xs font-semibold uppercase tracking-wider text-okoa-muted">

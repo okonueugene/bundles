@@ -34,7 +34,7 @@
 
             <div>
                 <label for="phone" class="block text-sm font-medium">Phone number</label>
-                <p class="mt-1 text-xs text-okoa-muted">Enter the Safaricom number to receive the bundle.</p>
+                <p class="mt-1 text-sm text-okoa-muted">Enter the Safaricom number to receive the bundle.</p>
                 <input
                     type="tel"
                     id="phone"

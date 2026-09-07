@@ -45,7 +45,54 @@
 
     <!-- Orders Table -->
     <div class="bg-white rounded-xl border border-okoa-border overflow-hidden">
-        <div class="overflow-x-auto">
+        @php
+            $statusClasses = [
+                'fulfilled' => 'bg-green-50 text-green-700 border border-green-200',
+                'needs_attention' => 'bg-red-50 text-red-700 border border-red-200',
+                'pending' => 'bg-blue-50 text-blue-700 border border-blue-200',
+                'processing' => 'bg-blue-50 text-blue-700 border border-blue-200',
+                'queued_for_retry' => 'bg-yellow-50 text-yellow-700 border border-yellow-200',
+            ];
+        @endphp
+
+        @forelse($transactions as $tx)
+            @php
+                $classes = $statusClasses[$tx->status] ?? 'bg-slate-50 text-slate-700 border border-slate-200';
+            @endphp
+
+            {{-- Mobile card, shown only below sm --}}
+            <div class="sm:hidden border-b border-okoa-border p-4 last:border-b-0">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="font-medium text-okoa-charcoal">{{ $tx->order_reference ?: 'C2B (Till/Paybill)' }}</div>
+                        <div class="text-xs text-okoa-muted">{{ $tx->phone_number }}</div>
+                    </div>
+                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $classes }}">
+                        {{ str_replace('_', ' ', $tx->status) }}
+                    </span>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                        <div class="text-xs text-okoa-muted">Amount</div>
+                        <div class="font-semibold text-okoa-charcoal">KSh {{ number_format($tx->amount, 2) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-okoa-muted">Date</div>
+                        <div class="text-okoa-charcoal">{{ $tx->created_at->format('M j, H:i') }}</div>
+                    </div>
+                </div>
+                <div class="mt-2 text-xs font-mono text-okoa-muted break-all">
+                    {{ $tx->mpesa_receipt_number ?: '-' }} · {{ $tx->package_code ?: 'Unmapped' }}
+                </div>
+                <a href="{{ route('admin.orders.show', $tx) }}" class="mt-3 inline-flex min-h-9 items-center text-xs font-semibold text-ok hover:text-ok-dark">
+                    View Detail →
+                </a>
+            </div>
+        @empty
+            <div class="p-8 text-center text-okoa-muted sm:col-span-2">No transactions found.</div>
+        @endforelse
+
+        <div class="hidden sm:block overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-okoa-bg border-b border-okoa-border text-xs font-semibold uppercase tracking-wider text-okoa-muted">
@@ -60,48 +107,30 @@
                 </thead>
                 <tbody class="divide-y divide-okoa-border text-sm">
                     @forelse($transactions as $tx)
+                        @php
+                            $classes = $statusClasses[$tx->status] ?? 'bg-slate-50 text-slate-700 border border-slate-200';
+                        @endphp
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-4 py-3.5">
-                                <div class="font-medium text-okoa-charcoal">
-                                    {{ $tx->order_reference ?: 'C2B (Till/Paybill)' }}
-                                </div>
-                                <div class="text-xs text-okoa-muted">
-                                    {{ $tx->phone_number }}
-                                </div>
+                                <div class="font-medium text-okoa-charcoal">{{ $tx->order_reference ?: 'C2B (Till/Paybill)' }}</div>
+                                <div class="text-xs text-okoa-muted">{{ $tx->phone_number }}</div>
                             </td>
-                            <td class="px-4 py-3.5 text-okoa-charcoal font-mono text-xs">
-                                {{ $tx->mpesa_receipt_number ?: '-' }}
-                            </td>
-                            <td class="px-4 py-3.5 text-right font-semibold text-okoa-charcoal">
-                                KSh {{ number_format($tx->amount, 2) }}
-                            </td>
-                            <td class="px-4 py-3.5 font-mono text-xs text-okoa-muted">
-                                {{ $tx->package_code ?: 'Unmapped' }}
-                            </td>
+                            <td class="px-4 py-3.5 text-okoa-charcoal font-mono text-xs">{{ $tx->mpesa_receipt_number ?: '-' }}</td>
+                            <td class="px-4 py-3.5 text-right font-semibold text-okoa-charcoal">KSh {{ number_format($tx->amount, 2) }}</td>
+                            <td class="px-4 py-3.5 font-mono text-xs text-okoa-muted">{{ $tx->package_code ?: 'Unmapped' }}</td>
                             <td class="px-4 py-3.5">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium 
-                                    @if($tx->status === 'fulfilled') bg-green-50 text-green-700 border border-green-200
-                                    @elseif($tx->status === 'needs_attention') bg-red-50 text-red-700 border border-red-200
-                                    @elseif($tx->status === 'pending' || $tx->status === 'processing') bg-blue-50 text-blue-700 border border-blue-200
-                                    @elseif($tx->status === 'queued_for_retry') bg-yellow-50 text-yellow-700 border border-yellow-200
-                                    @else bg-slate-50 text-slate-700 border border-slate-200 @endif">
+                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $classes }}">
                                     {{ str_replace('_', ' ', $tx->status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3.5 text-xs text-okoa-muted">
-                                {{ $tx->created_at->format('M j, H:i') }}
-                            </td>
+                            <td class="px-4 py-3.5 text-xs text-okoa-muted">{{ $tx->created_at->format('M j, H:i') }}</td>
                             <td class="px-4 py-3.5 text-right">
-                                <a href="{{ route('admin.orders.show', $tx) }}" class="text-xs font-semibold text-ok hover:text-ok-dark">
-                                    View Detail
-                                </a>
+                                <a href="{{ route('admin.orders.show', $tx) }}" class="text-xs font-semibold text-ok hover:text-ok-dark">View Detail</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-8 text-center text-okoa-muted">
-                                No transactions found.
-                            </td>
+                            <td colspan="7" class="px-4 py-8 text-center text-okoa-muted">No transactions found.</td>
                         </tr>
                     @endforelse
                 </tbody>

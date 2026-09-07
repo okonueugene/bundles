@@ -95,21 +95,21 @@
                     <span class="text-sm font-bold">1</span>
                 </div>
                 <h3 class="mt-3 text-sm font-semibold">Choose a bundle</h3>
-                <p class="mt-1 text-xs text-okoa-muted">Pick data, SMS, or minutes for your line.</p>
+                <p class="mt-1 text-sm text-okoa-muted">Pick data, SMS, or minutes for your line.</p>
             </div>
             <div class="text-center">
                 <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-ok-light text-ok">
                     <span class="text-sm font-bold">2</span>
                 </div>
                 <h3 class="mt-3 text-sm font-semibold">Pay with M-PESA</h3>
-                <p class="mt-1 text-xs text-okoa-muted">Enter your phone number and confirm the STK prompt.</p>
+                <p class="mt-1 text-sm text-okoa-muted">Enter your phone number and confirm the STK prompt.</p>
             </div>
             <div class="text-center">
                 <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-ok-light text-ok">
                     <span class="text-sm font-bold">3</span>
                 </div>
                 <h3 class="mt-3 text-sm font-semibold">Get your bundle</h3>
-                <p class="mt-1 text-xs text-okoa-muted">We deliver the bundle after payment is confirmed.</p>
+                <p class="mt-1 text-sm text-okoa-muted">We deliver the bundle after payment is confirmed.</p>
             </div>
         </div>
     </div>
